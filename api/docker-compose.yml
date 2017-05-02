@@ -1,0 +1,6 @@
+version: '2'
+services:
+  wanderer-api:
+    image: armlfs/wanderer-api:dev
+    volumes:
+      - $WANDERER_API:/mnt
