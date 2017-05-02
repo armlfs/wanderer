@@ -1,2 +1,3 @@
-FROM armlfs/php
-COPY . /mnt
+FROM armlfs/wanderer-api:dev
+COPY . .
+RUN composer install
