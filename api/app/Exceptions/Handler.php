@@ -4,6 +4,8 @@ namespace App\Exceptions;
 
 use Exception;
 use Illuminate\Auth\AuthenticationException;
+use Illuminate\Validation\ValidationException;
+use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
 
 class Handler extends ExceptionHandler
@@ -44,7 +46,61 @@ class Handler extends ExceptionHandler
      */
     public function render($request, Exception $exception)
     {
-        return parent::render($request, $exception);
+        $exception = $this->prepareException($exception);
+
+        if ($exception instanceof HttpResponseException) {
+            return $exception->getResponse();
+        } elseif ($exception instanceof AuthenticationException) {
+            return $this->unauthenticated($request, $exception);
+        } elseif ($exception instanceof ValidationException) {
+            return $this->convertValidationExceptionToResponse($exception, $request);
+        }
+
+        return $request->expectsJson()
+            ? $this->prepareJsonResponse($request, $exception)
+            : $this->prepareResponse($request, $exception);
+    }
+
+    /**
+     * Prepare a JSON response for the given exception.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  \Exception $exception
+     * @return \Illuminate\Http\JsonResponse
+     */
+    protected function prepareJsonResponse($request, Exception $exception)
+    {
+        $status = $this->isHttpException($exception)
+            ? $exception->getStatusCode() : 500;
+
+        $headers = $this->isHttpException($exception)
+            ? $exception->getHeaders() : [];
+
+        return response()->json(
+            $this->convertExceptionToArray($exception),
+            $status,
+            $headers,
+            JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES
+        );
+    }
+
+    /**
+     * Convert the given exception to an array.
+     *
+     * @param  \Exception  $exception
+     * @return array
+     */
+    protected function convertExceptionToArray(Exception $exception)
+    {
+        return config('app.debug') ? [
+            'message' => $exception->getMessage(),
+            'file' => $exception->getFile(),
+            'line' => $exception->getLine(),
+            'trace' => $exception->getTrace(),
+        ] : [
+            'message' => $this->isHttpException($exception)
+            ? $exception->getMessage() : 'Server Error',
+        ];
     }
 
     /**
