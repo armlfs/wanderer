@@ -31,6 +31,10 @@ class Controller extends BaseController
             $query['order'] = $request->order;
         }
 
+        if ($request->per_page) {
+            $query['per_page'] = $request->per_page;
+        }
+
         return $model->paginate($request->per_page)->appends($query);
     }
 }
