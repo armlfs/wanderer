@@ -14,7 +14,7 @@ class PostController extends Controller
      */
     public function index()
     {
-        //
+        return $this->paginate(new Post);
     }
 
     /**
@@ -35,7 +35,11 @@ class PostController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $this->validate($request, [
+            'name' => 'required',
+            'body' => 'required',
+        ]);
+        return response(Post::create($request->all()), 201);
     }
 
     /**
@@ -46,7 +50,7 @@ class PostController extends Controller
      */
     public function show(Post $post)
     {
-        //
+        return $post;
     }
 
     /**
