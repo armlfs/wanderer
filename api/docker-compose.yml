@@ -4,9 +4,3 @@ services:
     image: armlfs/wanderer-api:dev
     volumes:
       - $WANDERER_API:/mnt
-  nginx:
-    volumes:
-      - $WANDERER_API/nginx.conf:/etc/nginx/conf.d/wanderer-api.conf
-      - $WANDERER_API/nginx.api.conf:/etc/nginx/conf.d/wanderer/api.conf
-    links:
-      - wanderer-api
