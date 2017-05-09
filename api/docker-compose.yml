@@ -1,6 +1,7 @@
 version: '2'
 services:
   wanderer-api:
-    image: armlfs/wanderer-api:dev
+    image: armlfs/php
     volumes:
       - $WANDERER_API:/mnt
+    command: tini php artisan serve --host=0.0.0.0 --port=80
